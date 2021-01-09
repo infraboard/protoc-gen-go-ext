@@ -38,7 +38,7 @@ codegen: # Init Service
 	@protoc -I=.  -I${GOPATH}/src --go_out=module=${PKG}:. extension/tag/*.proto
 
 gent: # Init Service
-	@protoc -I=.  -I${GOPATH}/src --go-ext_out=module=${PKG}:. examples/*.proto
+	@protoc -I=.  -I${GOPATH}/src --go-ext_out=:. --go-ext_opt=module=${PKG} examples/*.proto
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

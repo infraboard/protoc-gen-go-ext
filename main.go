@@ -2,49 +2,40 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
-	"os"
 
+	"github.com/searKing/golang/tools/cmd/protoc-gen-go-tag/ast"
 	gengo "google.golang.org/protobuf/cmd/protoc-gen-go/internal_gengo"
 	"google.golang.org/protobuf/compiler/protogen"
-
-	"github.com/infraboard/protoc-gen-go-ext/ast"
 )
 
 func main() {
 	var (
-		flags flag.FlagSet
+		flags        flag.FlagSet
+		importPrefix = flags.String("import_prefix", "", "prefix to prepend to import paths")
 	)
-	// For Debug Only
-	{ // Dump
-		in, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			panic(err)
+	importRewriteFunc := func(importPath protogen.GoImportPath) protogen.GoImportPath {
+		switch importPath {
+		case "context", "fmt", "math":
+			return importPath
 		}
-		if err := ioutil.WriteFile("in.pb", in, 0666); err != nil {
-			panic(err)
+		if *importPrefix != "" {
+			return protogen.GoImportPath(*importPrefix) + importPath
 		}
-	}
-	{ // Debug
-		os.Stdin, _ = os.Open("in.pb")
-		os.Stdout, _ = os.Create("out.pb")
+		return importPath
 	}
 
 	protogen.Options{
-		ParamFunc: flags.Set,
+		ParamFunc:         flags.Set,
+		ImportRewriteFunc: importRewriteFunc,
 	}.Run(func(gen *protogen.Plugin) error {
-		gen.SupportedFeatures = gengo.SupportedFeatures
-		var originFiles []*protogen.GeneratedFile
 		for _, f := range gen.Files {
-			if f.Generate {
-				originFiles = append(originFiles, gengo.GenerateFile(gen, f))
+			if !f.Generate {
+				continue
 			}
+			gengo.GenerateFile(gen, f)
 		}
 		ast.Rewrite(gen)
-
-		for _, f := range originFiles {
-			f.Skip()
-		}
+		gen.SupportedFeatures = gengo.SupportedFeatures
 		return nil
 	})
 }
