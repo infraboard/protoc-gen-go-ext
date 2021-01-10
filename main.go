@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/searKing/golang/tools/cmd/protoc-gen-go-tag/ast"
+	"github.com/infraboard/protoc-gen-go-ext/ast"
 	gengo "google.golang.org/protobuf/cmd/protoc-gen-go/internal_gengo"
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -28,14 +28,18 @@ func main() {
 		ParamFunc:         flags.Set,
 		ImportRewriteFunc: importRewriteFunc,
 	}.Run(func(gen *protogen.Plugin) error {
+		gen.SupportedFeatures = gengo.SupportedFeatures
+		var originFiles []*protogen.GeneratedFile
 		for _, f := range gen.Files {
-			if !f.Generate {
-				continue
+			if f.Generate {
+				originFiles = append(originFiles, gengo.GenerateFile(gen, f))
 			}
-			gengo.GenerateFile(gen, f)
 		}
 		ast.Rewrite(gen)
-		gen.SupportedFeatures = gengo.SupportedFeatures
+
+		for _, f := range originFiles {
+			f.Skip()
+		}
 		return nil
 	})
 }

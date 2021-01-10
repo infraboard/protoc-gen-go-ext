@@ -11,6 +11,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"path"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -65,7 +66,7 @@ func (g *Generator) addGoFile(astFile *ast.File, outerFile *pluginpb.CodeGenerat
 }
 
 // Generate produces the rewrite content to proto's Generator.
-func (g *Generator) Generate() {
+func (g *Generator) Generate(module string) {
 	for _, file := range g.goFiles {
 		// Set the state for this run of the walker.
 		if file.astFile != nil {
@@ -86,7 +87,8 @@ func (g *Generator) Generate() {
 			// fix Response will always be generated, so add a new generated file directly.
 			//content := buf.String()
 			//file.outerFile.Content = &content
-			_, err = g.protoGenerator.NewGeneratedFile(file.outerFile.GetName(), "").Write(buf.Bytes())
+
+			_, err = g.protoGenerator.NewGeneratedFile(path.Join(module, file.outerFile.GetName()), "").Write(buf.Bytes())
 			if err != nil {
 				g.protoGenerator.Error(fmt.Errorf("failed to new generated file to rewrite: %w", err))
 				continue

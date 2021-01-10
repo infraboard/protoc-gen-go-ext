@@ -6,6 +6,7 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
@@ -94,6 +95,8 @@ func WalkDescriptorProto(g *protogen.Plugin, dp *descriptor.DescriptorProto, typ
 func Rewrite(g *protogen.Plugin) {
 	var protoFiles []FileInfo
 
+	p := newProtoGenParams(g.Request.GetParameter())
+
 	for _, protoFile := range g.Request.GetProtoFile() {
 		if !strings_.SliceContains(g.Request.GetFileToGenerate(), protoFile.GetName()) {
 			continue
@@ -123,5 +126,29 @@ func Rewrite(g *protogen.Plugin) {
 	for _, f := range g.Response().GetFile() {
 		rewriter.ParseGoContent(f)
 	}
-	rewriter.Generate()
+	rewriter.Generate(p.Get("module"))
+}
+
+func newProtoGenParams(s string) *parameter {
+	kvmap := map[string]string{}
+	kvStr := strings.Split(s, ",")
+	for _, kv := range kvStr {
+		index := strings.Index(kv, "=")
+		if index > 0 {
+			kvmap[kv[:index]] = kv[index+1:]
+		}
+	}
+	return &parameter{kv: kvmap}
+}
+
+type parameter struct {
+	kv map[string]string
+}
+
+func (p *parameter) Get(key string) string {
+	if v, ok := p.kv[key]; ok {
+		return v
+	}
+
+	return ""
 }
