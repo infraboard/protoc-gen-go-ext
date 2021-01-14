@@ -32,6 +32,7 @@ type StructInfo struct {
 type FileInfo struct {
 	FileName    string
 	StructInfos []StructInfo
+	HasEnum     bool
 }
 
 func (si *StructInfo) FindField(name string) (FieldInfo, bool) {
@@ -92,6 +93,7 @@ func WalkDescriptorProto(g *protogen.Plugin, dp *descriptor.DescriptorProto, typ
 	return ss
 }
 
+// Rewrite 重新文件
 func Rewrite(g *protogen.Plugin) {
 	var protoFiles []FileInfo
 
@@ -103,6 +105,10 @@ func Rewrite(g *protogen.Plugin) {
 		}
 		f := FileInfo{}
 		f.FileName = protoFile.GetName()
+
+		if len(protoFile.EnumType) > 0 {
+			f.HasEnum = true
+		}
 
 		for _, messageType := range protoFile.GetMessageType() {
 			ss := WalkDescriptorProto(g, messageType, nil)

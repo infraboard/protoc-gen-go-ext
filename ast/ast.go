@@ -36,6 +36,17 @@ type GoFile struct {
 	fileChanged bool
 }
 
+// HasEnum todo
+func (g *GoFile) HasEnum() bool {
+	for _, pf := range g.protoFiles {
+		if pf.HasEnum {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (g *GoFile) FoundProtoMessage(typ string) (StructInfo, bool) {
 	for _, p := range g.protoFiles {
 		for _, s := range p.StructInfos {

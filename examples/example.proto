@@ -5,6 +5,19 @@ package pb;
 import "github.com/infraboard/protoc-gen-go-ext/extension/tag/tag.proto";
 option go_package = "github.com/infraboard/protoc-gen-go-ext/examples";
 
+enum GrantType {
+  NULL = 0; 
+  UNKNOWN = 1;
+  PASSWORD = 2;
+  LDAP = 3;
+  REFRESH = 4;
+  ACCESS = 5;
+  CLIENT = 6;
+  AUTH_CODE = 7;
+  IMPLICIT = 8;
+}
+
+
 message Http{
   string protocol = 1[(google.protobuf.field_tag) = {struct_tag: 'validate:"oneof=http https"'}];
   // version_default is the same as version_update
