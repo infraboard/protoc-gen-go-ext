@@ -116,12 +116,8 @@ func Rewrite(g *protogen.Plugin) {
 				f.StructInfos = append(f.StructInfos, ss...)
 			}
 		}
-		if len(f.StructInfos) > 0 {
-			protoFiles = append(protoFiles, f)
-		}
-	}
-	if len(protoFiles) == 0 {
-		return
+
+		protoFiles = append(protoFiles, f)
 	}
 	// g.Response() will generate files, so skip this step
 	//if len(g.Response().GetFile()) == 0 {
