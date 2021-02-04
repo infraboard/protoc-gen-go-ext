@@ -94,7 +94,6 @@ func (g *GoFile) genDecl(node ast.Node) bool {
 
 		// Handle comment
 		//if c := tspec.Comment; c != nil && len(c.List) == 1 {}
-
 		for _, field := range sExpr.Fields.List {
 			fieldName := ""
 			if len(field.Names) != 0 { // pick first exported Name
@@ -135,7 +134,7 @@ func (g *GoFile) genDecl(node ast.Node) bool {
 
 			// rewrite tags
 			{
-				for _, protoTag := range protoTags.Tags() {
+				for _, protoTag := range protoTags.OrderedTags() {
 					goTag, _ := goTags.Get(protoTag.Key)
 					goTag.Key = protoTag.Key
 					if protoTag.Name != "" {
